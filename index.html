@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | TechQuanta Hall of Excellence</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2>TechQuanta <span class="highlight">Admin Hub</span></h2>
+        <button id="logoutBtn" style="display: none;">Secure Logout</button>
+    </nav>
+
+    <div class="container" id="loginSection">
+        <div class="glass-panel centered-panel">
+            <h3>Admin Authorization</h3>
+            <p class="subtitle">Use admin@techquanta.com</p>
+            <input type="email" id="email" placeholder="Admin Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button id="loginBtn" class="btn-primary">Authorize Access</button>
+        </div>
+    </div>
+
+    <div class="container" id="dashboardSection" style="display: none;">
+        <div class="grid-layout">
+            <div class="glass-panel">
+                <h3>1. Create Intern Account</h3>
+                <p class="subtitle">Generate credentials for a new intern.</p>
+                <input type="text" id="newInternName" placeholder="Intern Full Name">
+                <input type="email" id="newInternEmail" placeholder="Intern Email">
+                <input type="text" id="newInternPassword" placeholder="Temporary Password">
+                <button id="createInternBtn" class="btn-secondary">Create Account</button>
+                <div id="createStatus" class="status-msg"></div>
+            </div>
+
+            <div class="glass-panel">
+                <h3>2. Award a Badge</h3>
+                <p class="subtitle">Select an intern and bestow a mark of excellence.</p>
+                <select id="internSelect">
+                    <option value="">Loading interns...</option>
+                </select>
+                
+                <select id="badgeSelect">
+                    <option value="rising-star">⭐ Rising Star (Consistency & Dedication)</option>
+                    <option value="excellence">💎 Excellence (Beyond Expectations)</option>
+                    <option value="legend">👑 Legend (Lasting Contribution)</option>
+                </select>
+
+                <textarea id="customMessage" rows="3" placeholder="Write a custom appreciation message..."></textarea>
+                <button id="awardBtn" class="btn-primary">Bestow Live Badge</button>
+                <div id="awardStatus" class="status-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
