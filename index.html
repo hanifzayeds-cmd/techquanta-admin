@@ -421,9 +421,10 @@
         <div class="glass-panel centered-panel">
             <h3>🔐 Admin Authorization</h3>
             <p class="subtitle">Access restricted to management personnel</p>
-            <input type="email" id="email" placeholder="admin@techquanta.com">
+            <input type="email" id="email" placeholder="admin@techquanta.com" value="admin@techquanta.com">
             <input type="password" id="password" placeholder="Password">
             <button id="loginBtn" class="btn-primary">✨ Authorize Access</button>
+            <div id="loginStatus" class="status-msg" style="margin-top: 1rem;"></div>
         </div>
     </div>
 
@@ -518,7 +519,6 @@
                 <button id="viewInsightBtn" class="view-details-btn">📊 View Dashboard</button>
             </div>
             <div id="individualDashboardContainer">
-                <!-- dynamic employee dashboard will appear here -->
                 <div style="text-align: center; opacity: 0.6; padding: 2rem;">✨ Select an intern and click 'View Dashboard' to see their achievements & feedback.</div>
             </div>
         </div>
@@ -552,8 +552,12 @@
         const internSelect = document.getElementById('internSelect');
         const blackmarkInternSelect = document.getElementById('blackmarkInternSelect');
         const insightInternSelect = document.getElementById('insightInternSelect');
+        const loginStatus = document.getElementById('loginStatus');
 
         let currentInternsMap = new Map(); // id -> {name, email}
+
+        // ADMIN CREDENTIALS (for validation only, no auto-creation)
+        const ADMIN_EMAIL = "admin@techquanta.com";
 
         // Update stats
         async function updateStats() {
@@ -573,7 +577,7 @@
             const activities = [];
             
             const awardsQuery = query(collection(db, "awards"), where("timestamp", ">=", Date.now() - 7 * 24 * 60 * 60 * 1000));
-            onSnapshot(awardsQuery, async (snapshot) => {
+            const unsubscribeAwards = onSnapshot(awardsQuery, async (snapshot) => {
                 for (const docSnap of snapshot.docs) {
                     const data = docSnap.data();
                     const userDoc = await getDoc(doc(db, "users", data.userId));
@@ -583,7 +587,7 @@
             });
 
             const blackmarksQuery = query(collection(db, "blackmarks"), where("timestamp", ">=", Date.now() - 7 * 24 * 60 * 60 * 1000));
-            onSnapshot(blackmarksQuery, async (snapshot) => {
+            const unsubscribeBlackmarks = onSnapshot(blackmarksQuery, async (snapshot) => {
                 for (const docSnap of snapshot.docs) {
                     const data = docSnap.data();
                     const userDoc = await getDoc(doc(db, "users", data.userId));
@@ -612,13 +616,14 @@
         }
 
         onAuthStateChanged(auth, (user) => {
-            if (user && user.email === 'admin@techquanta.com') {
+            if (user && user.email === ADMIN_EMAIL) {
                 loginSec.style.display = 'none';
                 dashSec.style.display = 'block';
                 logoutBtn.style.display = 'block';
                 fetchInterns();
                 updateStats();
                 loadRecentActivity();
+                loginStatus.innerText = "";
             } else {
                 loginSec.style.display = 'block';
                 dashSec.style.display = 'none';
@@ -627,9 +632,25 @@
         });
 
         document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                loginStatus.innerText = "❌ Please enter email and password";
+                loginStatus.style.color = "#ff6b6b";
+                return;
+            }
+            
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-            } catch (e) { alert("Access Denied: " + e.message); }
+                loginStatus.innerText = "Logging in...";
+                loginStatus.style.color = "#92FE9D";
+                await signInWithEmailAndPassword(auth, email, password);
+                loginStatus.innerText = "✅ Login successful!";
+                setTimeout(() => loginStatus.innerText = "", 2000);
+            } catch (e) { 
+                loginStatus.innerText = "❌ Access Denied: " + e.message;
+                loginStatus.style.color = "#ff6b6b";
+            }
         });
 
         logoutBtn.addEventListener('click', () => signOut(auth));
@@ -875,16 +896,6 @@
             }
             renderEmployeeDashboard(selectedId, internData.name);
         });
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
     </script>
 </body>
 </html>
