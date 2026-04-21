@@ -281,6 +281,125 @@
             color: #ff6b6b;
         }
 
+        /* Employee Insights Panel (Modal Style) */
+        .insights-panel {
+            margin-top: 2rem;
+        }
+        .intern-selector {
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .intern-selector label {
+            font-weight: 500;
+            color: #00C9FF;
+        }
+        .intern-selector select {
+            flex: 2;
+            min-width: 200px;
+            margin-bottom: 0;
+        }
+        .view-details-btn {
+            flex: 0 0 auto;
+            width: auto;
+            padding: 0.7rem 1.8rem;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid rgba(0,201,255,0.4);
+            color: #00C9FF;
+        }
+        .view-details-btn:hover {
+            background: linear-gradient(135deg, #00C9FF, #92FE9D);
+            color: #0a0e27;
+        }
+        .employee-dashboard {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 201, 255, 0.2);
+            margin-top: 1rem;
+            animation: fadeSlide 0.4s ease;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .emp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .emp-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #92FE9D);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .emp-stats {
+            display: flex;
+            gap: 1.2rem;
+        }
+        .emp-stat {
+            background: rgba(0,0,0,0.4);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+        .emp-stat span {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-right: 0.3rem;
+            color: #00C9FF;
+        }
+        .badge-mini-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        .badge-mini-card {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 20px;
+            padding: 0.9rem;
+            border-left: 4px solid #00C9FF;
+        }
+        .blackmark-mini-card {
+            border-left-color: #ff6b6b;
+        }
+        .mini-title {
+            font-weight: 700;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .mini-date {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin: 0.3rem 0;
+        }
+        .mini-message {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            margin-top: 0.4rem;
+            font-style: italic;
+        }
+        .empty-insight {
+            text-align: center;
+            padding: 2rem;
+            opacity: 0.6;
+        }
         @media (max-width: 768px) {
             .navbar { padding: 1rem 1.5rem; }
             .container { padding: 0 1rem; }
@@ -386,12 +505,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- NEW: Individual Employee Insights Panel -->
+        <div class="glass-panel insights-panel">
+            <h3>🔍 5. Intern Insights Dashboard</h3>
+            <p class="subtitle">View detailed badge & blackmark history of any team member</p>
+            <div class="intern-selector">
+                <label>👤 Select Intern:</label>
+                <select id="insightInternSelect">
+                    <option value="">-- Choose an intern --</option>
+                </select>
+                <button id="viewInsightBtn" class="view-details-btn">📊 View Dashboard</button>
+            </div>
+            <div id="individualDashboardContainer">
+                <!-- dynamic employee dashboard will appear here -->
+                <div style="text-align: center; opacity: 0.6; padding: 2rem;">✨ Select an intern and click 'View Dashboard' to see their achievements & feedback.</div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, query, where, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, query, where, onSnapshot, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCFY5Bt8t8n8dAWuP_frYRJYfGmUaWuC4k",
@@ -415,6 +551,9 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const internSelect = document.getElementById('internSelect');
         const blackmarkInternSelect = document.getElementById('blackmarkInternSelect');
+        const insightInternSelect = document.getElementById('insightInternSelect');
+
+        let currentInternsMap = new Map(); // id -> {name, email}
 
         // Update stats
         async function updateStats() {
@@ -435,22 +574,20 @@
             
             const awardsQuery = query(collection(db, "awards"), where("timestamp", ">=", Date.now() - 7 * 24 * 60 * 60 * 1000));
             onSnapshot(awardsQuery, async (snapshot) => {
-                for (const doc of snapshot.docs) {
-                    const data = doc.data();
-                    const userDoc = await getDocs(query(collection(db, "users"), where("__name__", "==", data.userId)));
-                    let userName = "Intern";
-                    userDoc.forEach(u => { userName = u.data().name; });
+                for (const docSnap of snapshot.docs) {
+                    const data = docSnap.data();
+                    const userDoc = await getDoc(doc(db, "users", data.userId));
+                    let userName = userDoc.exists() ? userDoc.data().name : "Intern";
                     activities.push({ type: 'badge', name: userName, detail: data.badgeType, time: data.timestamp });
                 }
             });
 
             const blackmarksQuery = query(collection(db, "blackmarks"), where("timestamp", ">=", Date.now() - 7 * 24 * 60 * 60 * 1000));
             onSnapshot(blackmarksQuery, async (snapshot) => {
-                for (const doc of snapshot.docs) {
-                    const data = doc.data();
-                    const userDoc = await getDocs(query(collection(db, "users"), where("__name__", "==", data.userId)));
-                    let userName = "Intern";
-                    userDoc.forEach(u => { userName = u.data().name; });
+                for (const docSnap of snapshot.docs) {
+                    const data = docSnap.data();
+                    const userDoc = await getDoc(doc(db, "users", data.userId));
+                    let userName = userDoc.exists() ? userDoc.data().name : "Intern";
                     activities.push({ type: 'blackmark', name: userName, detail: data.severity, time: data.timestamp });
                 }
                 
@@ -464,7 +601,7 @@
                         <div style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 0.75rem;">
                             <span style="font-size: 1.2rem;">${a.type === 'badge' ? '🏆' : '⚠️'}</span>
                             <div style="flex: 1;">
-                                <div style="font-weight: 500;">${a.name}</div>
+                                <div style="font-weight: 500;">${escapeHtml(a.name)}</div>
                                 <div style="font-size: 0.75rem; color: #94a3b8;">${a.type === 'badge' ? `Received ${a.detail} badge` : `Received ${a.detail} blackmark`}</div>
                             </div>
                             <div style="font-size: 0.7rem; color: #4a5568;">${new Date(a.time).toLocaleDateString()}</div>
@@ -502,11 +639,15 @@
             onSnapshot(q, (snapshot) => {
                 internSelect.innerHTML = '<option value="">-- Select Intern --</option>';
                 blackmarkInternSelect.innerHTML = '<option value="">-- Select Intern --</option>';
-                snapshot.forEach((doc) => {
-                    const intern = doc.data();
-                    const option = `<option value="${doc.id}">${intern.name} (${intern.email})</option>`;
+                insightInternSelect.innerHTML = '<option value="">-- Choose an intern --</option>';
+                currentInternsMap.clear();
+                snapshot.forEach((docSnap) => {
+                    const intern = docSnap.data();
+                    const option = `<option value="${docSnap.id}">${escapeHtml(intern.name)} (${escapeHtml(intern.email)})</option>`;
                     internSelect.innerHTML += option;
                     blackmarkInternSelect.innerHTML += option;
+                    insightInternSelect.innerHTML += option;
+                    currentInternsMap.set(docSnap.id, { name: intern.name, email: intern.email });
                 });
             });
         }
@@ -606,6 +747,144 @@
                 status.style.color = "#ff6b6b";
             }
         });
+
+        // ---- INDIVIDUAL EMPLOYEE INSIGHTS ----
+        const viewBtn = document.getElementById('viewInsightBtn');
+        const container = document.getElementById('individualDashboardContainer');
+        let activeBadgeUnsub = null;
+        let activeBlackmarkUnsub = null;
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function renderEmployeeDashboard(internId, internName) {
+            // Clear previous listeners
+            if (activeBadgeUnsub) activeBadgeUnsub();
+            if (activeBlackmarkUnsub) activeBlackmarkUnsub();
+
+            container.innerHTML = `<div style="text-align:center; padding: 1rem;">📡 Loading dashboard for ${escapeHtml(internName)}...</div>`;
+
+            // Badges listener
+            const badgesQuery = query(collection(db, "awards"), where("userId", "==", internId));
+            activeBadgeUnsub = onSnapshot(badgesQuery, (badgeSnap) => {
+                // blackmarks listener will combine, but we need both to refresh UI together
+                const blackQuery = query(collection(db, "blackmarks"), where("userId", "==", internId));
+                if (activeBlackmarkUnsub) activeBlackmarkUnsub();
+                activeBlackmarkUnsub = onSnapshot(blackQuery, (blackSnap) => {
+                    buildInsightUI(internId, internName, badgeSnap, blackSnap);
+                });
+            });
+        }
+
+        function buildInsightUI(internId, internName, badgeSnapshot, blackmarkSnapshot) {
+            const badges = [];
+            badgeSnapshot.forEach(doc => badges.push({ id: doc.id, ...doc.data() }));
+            const blackmarks = [];
+            blackmarkSnapshot.forEach(doc => blackmarks.push({ id: doc.id, ...doc.data() }));
+            
+            badges.sort((a,b) => b.timestamp - a.timestamp);
+            blackmarks.sort((a,b) => b.timestamp - a.timestamp);
+
+            const badgeCount = badges.length;
+            const blackCount = blackmarks.length;
+
+            const badgeMap = {
+                'rising-star': { title: 'Rising Star', icon: '⭐' },
+                'excellence': { title: 'Excellence', icon: '💎' },
+                'legend': { title: 'Legend', icon: '👑' }
+            };
+            const severityMap = {
+                'minor': { label: 'Minor', icon: '🔵', class: 'severity-minor' },
+                'moderate': { label: 'Moderate', icon: '🟠', class: 'severity-moderate' },
+                'severe': { label: 'Severe', icon: '🔴', class: 'severity-severe' }
+            };
+
+            let badgesHtml = '';
+            if (badges.length === 0) {
+                badgesHtml = '<div class="empty-insight">🏅 No badges awarded yet.</div>';
+            } else {
+                badgesHtml = `<div class="badge-mini-grid">` + badges.map(b => {
+                    const info = badgeMap[b.badgeType] || { title: b.badgeType, icon: '🏅' };
+                    const date = new Date(b.timestamp).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                    return `
+                        <div class="badge-mini-card">
+                            <div class="mini-title">${info.icon} ${info.title}</div>
+                            <div class="mini-date">📅 ${date}</div>
+                            <div class="mini-message">💬 "${escapeHtml(b.message)}"</div>
+                        </div>
+                    `;
+                }).join('') + `</div>`;
+            }
+
+            let blackmarksHtml = '';
+            if (blackmarks.length === 0) {
+                blackmarksHtml = '<div class="empty-insight">✅ No constructive feedback records.</div>';
+            } else {
+                blackmarksHtml = `<div class="badge-mini-grid">` + blackmarks.map(b => {
+                    const sev = severityMap[b.severity] || { label: b.severity, icon: '⚠️', class: '' };
+                    const date = new Date(b.timestamp).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                    return `
+                        <div class="badge-mini-card blackmark-mini-card">
+                            <div class="mini-title">${sev.icon} ${sev.label} Blackmark</div>
+                            <div class="mini-date">📅 ${date}</div>
+                            <div class="mini-message">📝 "${escapeHtml(b.message)}"</div>
+                        </div>
+                    `;
+                }).join('') + `</div>`;
+            }
+
+            const fullHtml = `
+                <div class="employee-dashboard">
+                    <div class="emp-header">
+                        <div class="emp-name">${escapeHtml(internName)}</div>
+                        <div class="emp-stats">
+                            <div class="emp-stat"><span>${badgeCount}</span> Badges</div>
+                            <div class="emp-stat"><span>${blackCount}</span> Feedback entries</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="font-weight: 600; margin-bottom: 0.7rem;">🏅 Badges & Recognitions</div>
+                        ${badgesHtml}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 0.7rem;">⚠️ Growth Feedback</div>
+                        ${blackmarksHtml}
+                    </div>
+                </div>
+            `;
+            container.innerHTML = fullHtml;
+        }
+
+        viewBtn.addEventListener('click', () => {
+            const selectedId = insightInternSelect.value;
+            if (!selectedId) {
+                container.innerHTML = `<div style="text-align: center; opacity: 0.7; padding: 2rem;">⚠️ Please select an intern first.</div>`;
+                return;
+            }
+            const internData = currentInternsMap.get(selectedId);
+            if (!internData) {
+                container.innerHTML = `<div style="text-align: center; opacity: 0.7; padding: 2rem;">❌ Intern data not found.</div>`;
+                return;
+            }
+            renderEmployeeDashboard(selectedId, internData.name);
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
     </script>
 </body>
 </html>
