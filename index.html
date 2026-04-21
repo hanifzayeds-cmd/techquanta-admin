@@ -6,205 +6,265 @@
     <title>Admin | TechQuanta Hall of Excellence</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-base: #020617;
+            --bg-panel: rgba(15, 23, 42, 0.6);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(56, 189, 248, 0.3);
+            --accent-cyan: #00f2fe;
+            --accent-green: #4facfe;
+            --accent-red: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
         }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #0f172a 50%, #1a1a3e 100%);
+            background-color: var(--bg-base);
             min-height: 100vh;
-            color: #ffffff;
+            color: var(--text-main);
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* Animated Background */
-        body::before {
-            content: '';
+        /* Animated Ambient Background */
+        .ambient-bg {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(0, 201, 255, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(146, 254, 157, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+            background: radial-gradient(circle at top right, #0a192f, #020617);
+        }
+
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+
+        .orb-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #0c4a6e; animation-duration: 25s; }
+        .orb-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #164e63; animation-delay: -5s; }
+        .orb-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: #1e1b4b; animation-duration: 30s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Navbar */
         .navbar {
-            position: relative;
-            z-index: 10;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.25rem 3rem;
-            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem 2rem;
+            background: rgba(2, 6, 23, 0.7);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 201, 255, 0.2);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+            transition: all 0.3s ease;
         }
 
         .navbar h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: 700;
             letter-spacing: -0.5px;
         }
 
         .highlight {
-            background: linear-gradient(135deg, #00C9FF, #92FE9D);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
             -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: 700;
+            -webkit-text-fill-color: transparent;
         }
 
         .logout-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.6rem 1.5rem;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            padding: 0.5rem 1.2rem;
+            border-radius: 10px;
             color: white;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .logout-btn:hover {
-            background: rgba(255, 71, 71, 0.2);
-            border-color: rgba(255, 71, 71, 0.5);
+            background: rgba(244, 63, 94, 0.1);
+            border-color: rgba(244, 63, 94, 0.4);
+            color: #fda4af;
             transform: translateY(-2px);
         }
 
-        /* Container */
+        /* Container & Grid */
         .container {
-            position: relative;
-            z-index: 5;
             max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeInUp 0.6s ease-out forwards;
         }
 
-        /* Glass Panel */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Glass Panels (Cards) */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 201, 255, 0.15);
-            border-radius: 24px;
+            background: var(--bg-panel);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
             padding: 2rem;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
         }
 
         .glass-panel:hover {
-            border-color: rgba(0, 201, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 201, 255, 0.1);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(0, 242, 254, 0.1);
         }
 
         .centered-panel {
-            max-width: 450px;
-            margin: 4rem auto;
+            max-width: 420px;
+            margin: 10vh auto;
             text-align: center;
+            padding: 3rem 2rem;
         }
 
-        /* Grid Layout */
-        .grid-layout {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 2rem;
-        }
-
-        /* Headings */
+        /* Typography inside cards */
         h3 {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            margin-bottom: 0.25rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .subtitle {
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 0.85rem;
             margin-bottom: 1.5rem;
-            border-left: 2px solid #00C9FF;
-            padding-left: 0.75rem;
+            line-height: 1.5;
         }
 
         /* Form Elements */
         input, select, textarea {
             width: 100%;
-            padding: 0.9rem 1rem;
+            padding: 1rem 1.2rem;
             margin-bottom: 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            color: white;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: #fff;
             font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             transition: all 0.3s ease;
         }
 
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
+        option { background: #0f172a; color: white; }
+
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #00C9FF;
-            box-shadow: 0 0 0 3px rgba(0, 201, 255, 0.1);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 4px rgba(0, 242, 254, 0.1);
         }
 
-        input::placeholder, textarea::placeholder {
-            color: #4a5568;
-        }
+        input::placeholder, textarea::placeholder { color: #64748b; }
 
         /* Buttons */
         button {
             width: 100%;
-            padding: 0.9rem;
-            border-radius: 14px;
+            padding: 1rem;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s ease;
             border: none;
-            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #00C9FF, #92FE9D);
-            color: #0a0e27;
-            box-shadow: 0 4px 15px rgba(0, 201, 255, 0.3);
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            color: #020617;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 201, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4);
+            filter: brightness(1.1);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
 
         .btn-blackmark {
-            background: linear-gradient(135deg, #434343, #1a1a2e);
-            color: #ff6b6b;
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            margin-top: 0.5rem;
+            background: rgba(244, 63, 94, 0.1);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.3);
         }
 
         .btn-blackmark:hover {
-            background: linear-gradient(135deg, #ff6b6b, #c0392b);
+            background: var(--accent-red);
             color: white;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 8px 25px rgba(244, 63, 94, 0.4);
+            transform: translateY(-2px);
         }
 
         /* Status Messages */
@@ -213,313 +273,291 @@
             font-size: 0.85rem;
             font-weight: 500;
             text-align: center;
-            padding: 0.5rem;
-            border-radius: 10px;
+            min-height: 20px;
         }
 
         /* Stats Section */
-        .stats-section {
-            margin-bottom: 2rem;
-        }
-
+        .stats-section { margin-bottom: 2rem; }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
         }
 
         .stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            padding: 1.2rem;
-            text-align: center;
-            border: 1px solid rgba(0, 201, 255, 0.1);
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.6));
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: transform 0.3s;
         }
 
-        .stat-number {
+        .stat-card:hover { transform: translateY(-5px); }
+
+        .stat-icon {
             font-size: 2rem;
+            background: rgba(255,255,255,0.05);
+            width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 16px;
+        }
+
+        .stat-info { display: flex; flex-direction: column; }
+
+        .stat-number {
+            font-size: 1.8rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #00C9FF, #92FE9D);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: #fff;
+            line-height: 1;
         }
 
         .stat-label {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-top: 0.3rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* Divider */
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0, 201, 255, 0.3), transparent);
-            margin: 1rem 0;
-        }
-
-        /* Badge Preview */
-        .badge-preview {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .badge-tag {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            background: rgba(0, 201, 255, 0.2);
-            border: 1px solid rgba(0, 201, 255, 0.3);
-        }
-
-        .blackmark-tag {
-            background: rgba(255, 107, 107, 0.2);
-            border-color: rgba(255, 107, 107, 0.3);
-            color: #ff6b6b;
-        }
-
-        /* Employee Insights Panel (Modal Style) */
-        .insights-panel {
-            margin-top: 2rem;
-        }
+        /* Employee Insights Area */
+        .insights-panel { margin-top: 1.5rem; }
+        
         .intern-selector {
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
             padding: 1rem;
             margin-bottom: 1.5rem;
             display: flex;
             gap: 1rem;
             align-items: center;
             flex-wrap: wrap;
+            border: 1px solid var(--border-glass);
         }
-        .intern-selector label {
-            font-weight: 500;
-            color: #00C9FF;
-        }
-        .intern-selector select {
-            flex: 2;
-            min-width: 200px;
-            margin-bottom: 0;
-        }
+        
+        .intern-selector label { font-weight: 500; color: var(--text-muted); }
+        .intern-selector select { flex: 1; min-width: 200px; margin-bottom: 0; }
+        
         .view-details-btn {
             flex: 0 0 auto;
             width: auto;
-            padding: 0.7rem 1.8rem;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 1px solid rgba(0,201,255,0.4);
-            color: #00C9FF;
+            padding: 1rem 2rem;
+            background: rgba(0, 242, 254, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 254, 0.3);
         }
-        .view-details-btn:hover {
-            background: linear-gradient(135deg, #00C9FF, #92FE9D);
-            color: #0a0e27;
-        }
+        
+        .view-details-btn:hover { background: var(--accent-cyan); color: #000; }
+
         .employee-dashboard {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 24px;
-            padding: 1.5rem;
-            border: 1px solid rgba(0, 201, 255, 0.2);
-            margin-top: 1rem;
-            animation: fadeSlide 0.4s ease;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-glass);
+            animation: fadeInUp 0.4s ease;
         }
-        @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+
         .emp-header {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
+            align-items: center;
             flex-wrap: wrap;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 1rem;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 1.5rem;
             margin-bottom: 1.5rem;
         }
+
         .emp-name {
             font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #fff, #92FE9D);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: #fff;
         }
-        .emp-stats {
-            display: flex;
-            gap: 1.2rem;
-        }
+
+        .emp-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
         .emp-stat {
-            background: rgba(0,0,0,0.4);
-            padding: 0.3rem 1rem;
+            background: rgba(255,255,255,0.05);
+            padding: 0.5rem 1.2rem;
             border-radius: 40px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border-glass);
         }
         .emp-stat span {
-            font-weight: 800;
-            font-size: 1.2rem;
-            margin-right: 0.3rem;
-            color: #00C9FF;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+            margin-right: 0.4rem;
         }
+
+        /* Mini Grid (Insights inside JS) */
         .badge-mini-grid {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 1rem;
-            max-height: 340px;
+            max-height: 400px;
             overflow-y: auto;
             padding-right: 0.5rem;
         }
-        .badge-mini-card {
-            background: rgba(15, 23, 42, 0.7);
-            border-radius: 20px;
-            padding: 0.9rem;
-            border-left: 4px solid #00C9FF;
+
+        .badge-mini-card, .blackmark-mini-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1.2rem;
+            border: 1px solid var(--border-glass);
+            border-top: 3px solid var(--accent-cyan);
+            transition: transform 0.2s;
         }
-        .blackmark-mini-card {
-            border-left-color: #ff6b6b;
+        
+        .badge-mini-card:hover, .blackmark-mini-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.05);
         }
-        .mini-title {
-            font-weight: 700;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .mini-date {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin: 0.3rem 0;
-        }
-        .mini-message {
-            font-size: 0.8rem;
-            color: #cbd5e1;
-            margin-top: 0.4rem;
-            font-style: italic;
-        }
-        .empty-insight {
-            text-align: center;
-            padding: 2rem;
-            opacity: 0.6;
-        }
+
+        .blackmark-mini-card { border-top-color: var(--accent-red); }
+
+        .mini-title { font-weight: 600; font-size: 1.05rem; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+        .mini-date { font-size: 0.75rem; color: var(--text-muted); margin: 0.5rem 0; }
+        .mini-message { font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; }
+
         @media (max-width: 768px) {
-            .navbar { padding: 1rem 1.5rem; }
-            .container { padding: 0 1rem; }
+            .navbar { padding: 1rem; }
+            .container { padding: 1rem; }
             .grid-layout { grid-template-columns: 1fr; }
             .glass-panel { padding: 1.5rem; }
+            .stat-card { padding: 1.2rem; }
+            .intern-selector { flex-direction: column; align-items: stretch; }
+            .view-details-btn { width: 100%; }
         }
     </style>
 </head>
 <body>
+    <div class="ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+
     <nav class="navbar">
         <div style="display: flex; align-items: center; gap: 12px;">
-            <img src="tq.jpeg" alt="TechQuanta Logo" style="height: 40px; width: auto; border-radius: 8px;">
-            <h2> TechQuanta <span class="highlight">Admin Hub</span></h2>
+            <img src="tq.jpeg" alt="Logo" style="height: 36px; width: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+            <h2>TechQuanta <span class="highlight">Admin</span></h2>
         </div>
-        <button id="logoutBtn" class="logout-btn" style="display: none;">🔒 Secure Logout</button>
+        <button id="logoutBtn" class="logout-btn" style="display: none;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            Logout
+        </button>
     </nav>
 
     <div class="container" id="loginSection">
         <div class="glass-panel centered-panel">
-            <h3>🔐 Admin Authorization</h3>
-            <p class="subtitle">Access restricted to management personnel</p>
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔐</div>
+            <h3>System Access</h3>
+            <p class="subtitle">Secure admin authorization required</p>
             <input type="email" id="email" placeholder="admin@techquanta.com" value="admin@techquanta.com">
             <input type="password" id="password" placeholder="Password">
-            <button id="loginBtn" class="btn-primary">✨ Authorize Access</button>
-            <div id="loginStatus" class="status-msg" style="margin-top: 1rem;"></div>
+            <button id="loginBtn" class="btn-primary">Authenticate</button>
+            <div id="loginStatus" class="status-msg"></div>
         </div>
     </div>
 
     <div class="container" id="dashboardSection" style="display: none;">
-        <!-- Stats Overview -->
         <div class="stats-section">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number" id="totalInterns">0</div>
-                    <div class="stat-label">Active Interns</div>
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="totalInterns">0</div>
+                        <div class="stat-label">Active Interns</div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="totalBadges">0</div>
-                    <div class="stat-label">Badges Awarded</div>
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="totalBadges">0</div>
+                        <div class="stat-label">Badges Awarded</div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="totalBlackmarks">0</div>
-                    <div class="stat-label">Blackmarks Issued</div>
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="totalBlackmarks">0</div>
+                        <div class="stat-label">Feedback Issued</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="grid-layout">
-            <!-- Create Intern Account Panel -->
             <div class="glass-panel">
-                <h3>👥 1. Create Intern Account</h3>
-                <p class="subtitle">Generate secure credentials for new team members</p>
+                <h3>👥 Onboard Intern</h3>
+                <p class="subtitle">Generate credentials for new members</p>
                 <input type="text" id="newInternName" placeholder="Full Name">
                 <input type="email" id="newInternEmail" placeholder="Email Address">
                 <input type="text" id="newInternPassword" placeholder="Temporary Password">
-                <button id="createInternBtn" class="btn-secondary">📝 Create Account</button>
+                <button id="createInternBtn" class="btn-secondary">Create Account</button>
                 <div id="createStatus" class="status-msg"></div>
             </div>
 
-            <!-- Award Badge Panel -->
             <div class="glass-panel">
-                <h3>🏆 2. Award a Badge</h3>
-                <p class="subtitle">Recognize excellence and outstanding performance</p>
+                <h3>🏆 Award Excellence</h3>
+                <p class="subtitle">Recognize outstanding performance</p>
                 <select id="internSelect">
                     <option value="">-- Select Intern --</option>
                 </select>
-                
                 <select id="badgeSelect">
-                    <option value="rising-star">⭐ Rising Star — Consistency & Dedication</option>
+                    <option value="rising-star">⭐ Rising Star — Dedication</option>
                     <option value="excellence">💎 Excellence — Beyond Expectations</option>
                     <option value="legend">👑 Legend — Lasting Contribution</option>
                 </select>
-
-                <textarea id="customMessage" rows="3" placeholder="Write a personalized appreciation message..."></textarea>
-                <button id="awardBtn" class="btn-primary">✨ Bestow Live Badge</button>
+                <textarea id="customMessage" rows="3" placeholder="Personalized appreciation message..."></textarea>
+                <button id="awardBtn" class="btn-primary">Bestow Badge</button>
                 <div id="awardStatus" class="status-msg"></div>
             </div>
 
-            <!-- Blackmark Panel -->
             <div class="glass-panel">
-                <h3>⚠️ 3. Issue Blackmark</h3>
-                <p class="subtitle">Professional feedback for improvement areas</p>
+                <h3>⚠️ Issue Feedback</h3>
+                <p class="subtitle">Log constructive growth areas</p>
                 <select id="blackmarkInternSelect">
                     <option value="">-- Select Intern --</option>
                 </select>
-                
                 <select id="blackmarkSeverity">
                     <option value="minor">🔵 Minor — Needs Attention</option>
-                    <option value="moderate">🟠 Moderate — Requires Improvement</option>
+                    <option value="moderate">🟠 Moderate — Needs Improvement</option>
                     <option value="severe">🔴 Severe — Serious Concern</option>
                 </select>
-
-                <textarea id="blackmarkMessage" rows="3" placeholder="Provide constructive feedback and actionable points..."></textarea>
-                <button id="blackmarkBtn" class="btn-blackmark">⚠️ Issue Blackmark</button>
+                <textarea id="blackmarkMessage" rows="3" placeholder="Actionable feedback..."></textarea>
+                <button id="blackmarkBtn" class="btn-blackmark">Log Feedback</button>
                 <div id="blackmarkStatus" class="status-msg"></div>
             </div>
 
-            <!-- Recent Activity Panel -->
             <div class="glass-panel">
-                <h3>📋 4. Recent Activity</h3>
-                <p class="subtitle">Latest recognitions and feedback</p>
-                <div id="recentActivity" style="max-height: 300px; overflow-y: auto;">
-                    <p style="color: #4a5568; text-align: center;">Loading activity...</p>
+                <h3>📋 Live Activity Stream</h3>
+                <p class="subtitle">Latest system events</p>
+                <div id="recentActivity" style="max-height: 280px; overflow-y: auto; padding-right: 5px;">
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 2rem;">Loading stream...</p>
                 </div>
             </div>
         </div>
 
-        <!-- NEW: Individual Employee Insights Panel -->
         <div class="glass-panel insights-panel">
-            <h3>🔍 5. Intern Insights Dashboard</h3>
-            <p class="subtitle">View detailed badge & blackmark history of any team member</p>
+            <h3>🔍 Deep Insights</h3>
+            <p class="subtitle">Comprehensive view of intern progression</p>
             <div class="intern-selector">
-                <label>👤 Select Intern:</label>
+                <label>Target:</label>
                 <select id="insightInternSelect">
                     <option value="">-- Choose an intern --</option>
                 </select>
-                <button id="viewInsightBtn" class="view-details-btn">📊 View Dashboard</button>
+                <button id="viewInsightBtn" class="view-details-btn">Generate Report</button>
             </div>
             <div id="individualDashboardContainer">
-                <div style="text-align: center; opacity: 0.6; padding: 2rem;">✨ Select an intern and click 'View Dashboard' to see their achievements & feedback.</div>
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;">📊</div>
+                    Select an intern to visualize their trajectory.
+                </div>
             </div>
         </div>
     </div>
@@ -554,12 +592,10 @@
         const insightInternSelect = document.getElementById('insightInternSelect');
         const loginStatus = document.getElementById('loginStatus');
 
-        let currentInternsMap = new Map(); // id -> {name, email}
+        let currentInternsMap = new Map();
 
-        // ADMIN CREDENTIALS (for validation only, no auto-creation)
         const ADMIN_EMAIL = "admin@techquanta.com";
 
-        // Update stats
         async function updateStats() {
             const usersSnapshot = await getDocs(query(collection(db, "users"), where("role", "==", "employee")));
             document.getElementById('totalInterns').innerText = usersSnapshot.size;
@@ -571,7 +607,6 @@
             document.getElementById('totalBlackmarks').innerText = blackmarksSnapshot.size;
         }
 
-        // Load recent activity
         function loadRecentActivity() {
             const activityDiv = document.getElementById('recentActivity');
             const activities = [];
@@ -599,16 +634,18 @@
                 const recent = activities.slice(0, 10);
                 
                 if (recent.length === 0) {
-                    activityDiv.innerHTML = '<p style="color: #4a5568; text-align: center;">No recent activity</p>';
+                    activityDiv.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 1rem;">No recent activity</p>';
                 } else {
                     activityDiv.innerHTML = recent.map(a => `
-                        <div style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 0.75rem;">
-                            <span style="font-size: 1.2rem;">${a.type === 'badge' ? '🏆' : '⚠️'}</span>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500;">${escapeHtml(a.name)}</div>
-                                <div style="font-size: 0.75rem; color: #94a3b8;">${a.type === 'badge' ? `Received ${a.detail} badge` : `Received ${a.detail} blackmark`}</div>
+                        <div style="padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 1rem;">
+                            <div style="font-size: 1.5rem; background: rgba(255,255,255,0.05); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                                ${a.type === 'badge' ? '🏆' : '⚠️'}
                             </div>
-                            <div style="font-size: 0.7rem; color: #4a5568;">${new Date(a.time).toLocaleDateString()}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #fff;">${escapeHtml(a.name)}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">${a.type === 'badge' ? `Received ${a.detail} badge` : `Received ${a.detail} feedback`}</div>
+                            </div>
+                            <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">${new Date(a.time).toLocaleDateString()}</div>
                         </div>
                     `).join('');
                 }
@@ -619,7 +656,7 @@
             if (user && user.email === ADMIN_EMAIL) {
                 loginSec.style.display = 'none';
                 dashSec.style.display = 'block';
-                logoutBtn.style.display = 'block';
+                logoutBtn.style.display = 'flex';
                 fetchInterns();
                 updateStats();
                 loadRecentActivity();
@@ -636,20 +673,20 @@
             const password = document.getElementById('password').value;
             
             if (!email || !password) {
-                loginStatus.innerText = "❌ Please enter email and password";
-                loginStatus.style.color = "#ff6b6b";
+                loginStatus.innerText = "❌ Credentials required";
+                loginStatus.style.color = "#f43f5e";
                 return;
             }
             
             try {
-                loginStatus.innerText = "Logging in...";
-                loginStatus.style.color = "#92FE9D";
+                loginStatus.innerText = "Authenticating...";
+                loginStatus.style.color = "#00f2fe";
                 await signInWithEmailAndPassword(auth, email, password);
-                loginStatus.innerText = "✅ Login successful!";
+                loginStatus.innerText = "✅ Authorized";
                 setTimeout(() => loginStatus.innerText = "", 2000);
             } catch (e) { 
-                loginStatus.innerText = "❌ Access Denied: " + e.message;
-                loginStatus.style.color = "#ff6b6b";
+                loginStatus.innerText = "❌ Access Denied";
+                loginStatus.style.color = "#f43f5e";
             }
         });
 
@@ -673,7 +710,6 @@
             });
         }
 
-        // Create Intern
         document.getElementById('createInternBtn').addEventListener('click', async () => {
             const name = document.getElementById('newInternName').value;
             const email = document.getElementById('newInternEmail').value;
@@ -683,8 +719,8 @@
             if(!name || !email || !password) return alert("Fill all fields");
 
             try {
-                status.innerText = "Creating account...";
-                status.style.color = "#92FE9D";
+                status.innerText = "Provisioning account...";
+                status.style.color = "#00f2fe";
                 
                 const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
                 await signOut(secondaryAuth);
@@ -696,7 +732,7 @@
                     createdAt: Date.now()
                 });
 
-                status.innerText = "✅ Intern created successfully!";
+                status.innerText = "✅ Account provisioned";
                 document.getElementById('newInternName').value = '';
                 document.getElementById('newInternEmail').value = '';
                 document.getElementById('newInternPassword').value = '';
@@ -705,22 +741,21 @@
                 updateStats();
             } catch (e) {
                 status.innerText = "❌ Error: " + e.message;
-                status.style.color = "#ff6b6b";
+                status.style.color = "#f43f5e";
             }
         });
 
-        // Award Badge
         document.getElementById('awardBtn').addEventListener('click', async () => {
             const uid = internSelect.value;
             const badge = document.getElementById('badgeSelect').value;
             const msg = document.getElementById('customMessage').value;
             const status = document.getElementById('awardStatus');
 
-            if(!uid || !msg) return alert("Select an intern and write a message.");
+            if(!uid || !msg) return alert("Selection and message required.");
 
             try {
-                status.innerText = "Awarding badge...";
-                status.style.color = "#92FE9D";
+                status.innerText = "Minting badge...";
+                status.style.color = "#00f2fe";
                 await addDoc(collection(db, "awards"), {
                     userId: uid,
                     badgeType: badge,
@@ -729,28 +764,27 @@
                     timestamp: Date.now()
                 });
 
-                status.innerText = "✅ Badge awarded successfully!";
+                status.innerText = "✅ Badge conferred";
                 document.getElementById('customMessage').value = '';
                 setTimeout(() => status.innerText = "", 4000);
                 updateStats();
             } catch (e) {
                 status.innerText = "❌ Error: " + e.message;
-                status.style.color = "#ff6b6b";
+                status.style.color = "#f43f5e";
             }
         });
 
-        // Issue Blackmark
         document.getElementById('blackmarkBtn').addEventListener('click', async () => {
             const uid = blackmarkInternSelect.value;
             const severity = document.getElementById('blackmarkSeverity').value;
             const msg = document.getElementById('blackmarkMessage').value;
             const status = document.getElementById('blackmarkStatus');
 
-            if(!uid || !msg) return alert("Select an intern and write feedback message.");
+            if(!uid || !msg) return alert("Selection and details required.");
 
             try {
-                status.innerText = "Issuing blackmark...";
-                status.style.color = "#ffaa44";
+                status.innerText = "Logging...";
+                status.style.color = "#f43f5e";
                 await addDoc(collection(db, "blackmarks"), {
                     userId: uid,
                     severity: severity,
@@ -759,17 +793,16 @@
                     timestamp: Date.now()
                 });
 
-                status.innerText = "⚠️ Blackmark issued successfully!";
+                status.innerText = "⚠️ Feedback logged";
                 document.getElementById('blackmarkMessage').value = '';
                 setTimeout(() => status.innerText = "", 4000);
                 updateStats();
             } catch (e) {
                 status.innerText = "❌ Error: " + e.message;
-                status.style.color = "#ff6b6b";
+                status.style.color = "#f43f5e";
             }
         });
 
-        // ---- INDIVIDUAL EMPLOYEE INSIGHTS ----
         const viewBtn = document.getElementById('viewInsightBtn');
         const container = document.getElementById('individualDashboardContainer');
         let activeBadgeUnsub = null;
@@ -786,16 +819,13 @@
         }
 
         function renderEmployeeDashboard(internId, internName) {
-            // Clear previous listeners
             if (activeBadgeUnsub) activeBadgeUnsub();
             if (activeBlackmarkUnsub) activeBlackmarkUnsub();
 
-            container.innerHTML = `<div style="text-align:center; padding: 1rem;">📡 Loading dashboard for ${escapeHtml(internName)}...</div>`;
+            container.innerHTML = `<div style="text-align:center; padding: 3rem; color: var(--accent-cyan);">Generating report for ${escapeHtml(internName)}...</div>`;
 
-            // Badges listener
             const badgesQuery = query(collection(db, "awards"), where("userId", "==", internId));
             activeBadgeUnsub = onSnapshot(badgesQuery, (badgeSnap) => {
-                // blackmarks listener will combine, but we need both to refresh UI together
                 const blackQuery = query(collection(db, "blackmarks"), where("userId", "==", internId));
                 if (activeBlackmarkUnsub) activeBlackmarkUnsub();
                 activeBlackmarkUnsub = onSnapshot(blackQuery, (blackSnap) => {
@@ -829,7 +859,7 @@
 
             let badgesHtml = '';
             if (badges.length === 0) {
-                badgesHtml = '<div class="empty-insight">🏅 No badges awarded yet.</div>';
+                badgesHtml = '<div style="text-align: center; padding: 2rem; color: var(--text-muted); background: rgba(0,0,0,0.2); border-radius: 12px;">No awards mapped yet.</div>';
             } else {
                 badgesHtml = `<div class="badge-mini-grid">` + badges.map(b => {
                     const info = badgeMap[b.badgeType] || { title: b.badgeType, icon: '🏅' };
@@ -837,8 +867,8 @@
                     return `
                         <div class="badge-mini-card">
                             <div class="mini-title">${info.icon} ${info.title}</div>
-                            <div class="mini-date">📅 ${date}</div>
-                            <div class="mini-message">💬 "${escapeHtml(b.message)}"</div>
+                            <div class="mini-date">Granted: ${date}</div>
+                            <div class="mini-message">"${escapeHtml(b.message)}"</div>
                         </div>
                     `;
                 }).join('') + `</div>`;
@@ -846,54 +876,50 @@
 
             let blackmarksHtml = '';
             if (blackmarks.length === 0) {
-                blackmarksHtml = '<div class="empty-insight">✅ No constructive feedback records.</div>';
+                blackmarksHtml = '<div style="text-align: center; padding: 2rem; color: var(--text-muted); background: rgba(0,0,0,0.2); border-radius: 12px;">Clean record.</div>';
             } else {
                 blackmarksHtml = `<div class="badge-mini-grid">` + blackmarks.map(b => {
                     const sev = severityMap[b.severity] || { label: b.severity, icon: '⚠️', class: '' };
                     const date = new Date(b.timestamp).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
                     return `
-                        <div class="badge-mini-card blackmark-mini-card">
-                            <div class="mini-title">${sev.icon} ${sev.label} Blackmark</div>
-                            <div class="mini-date">📅 ${date}</div>
-                            <div class="mini-message">📝 "${escapeHtml(b.message)}"</div>
+                        <div class="blackmark-mini-card">
+                            <div class="mini-title">${sev.icon} ${sev.label} Area</div>
+                            <div class="mini-date">Logged: ${date}</div>
+                            <div class="mini-message">"${escapeHtml(b.message)}"</div>
                         </div>
                     `;
                 }).join('') + `</div>`;
             }
 
-            const fullHtml = `
+            container.innerHTML = `
                 <div class="employee-dashboard">
                     <div class="emp-header">
                         <div class="emp-name">${escapeHtml(internName)}</div>
                         <div class="emp-stats">
-                            <div class="emp-stat"><span>${badgeCount}</span> Badges</div>
-                            <div class="emp-stat"><span>${blackCount}</span> Feedback entries</div>
+                            <div class="emp-stat"><span>${badgeCount}</span> Awards</div>
+                            <div class="emp-stat"><span>${blackCount}</span> Notes</div>
                         </div>
                     </div>
-                    <div style="margin-bottom: 1.5rem;">
-                        <div style="font-weight: 600; margin-bottom: 0.7rem;">🏅 Badges & Recognitions</div>
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: #fff; margin-bottom: 1rem; font-size: 1.1rem;">🏆 Hall of Fame</h4>
                         ${badgesHtml}
                     </div>
                     <div>
-                        <div style="font-weight: 600; margin-bottom: 0.7rem;">⚠️ Growth Feedback</div>
+                        <h4 style="color: #fff; margin-bottom: 1rem; font-size: 1.1rem;">📈 Growth Areas</h4>
                         ${blackmarksHtml}
                     </div>
                 </div>
             `;
-            container.innerHTML = fullHtml;
         }
 
         viewBtn.addEventListener('click', () => {
             const selectedId = insightInternSelect.value;
             if (!selectedId) {
-                container.innerHTML = `<div style="text-align: center; opacity: 0.7; padding: 2rem;">⚠️ Please select an intern first.</div>`;
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 3rem;">Please select an intern target.</div>`;
                 return;
             }
             const internData = currentInternsMap.get(selectedId);
-            if (!internData) {
-                container.innerHTML = `<div style="text-align: center; opacity: 0.7; padding: 2rem;">❌ Intern data not found.</div>`;
-                return;
-            }
+            if (!internData) return;
             renderEmployeeDashboard(selectedId, internData.name);
         });
     </script>
